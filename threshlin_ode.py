@@ -79,8 +79,3 @@ def threshlin_ode(W, b=None, T=None, X0=None):
 
     return soln
 
-A = np.random.rand(2, 2)
-W = np.tril(A) + np.tril(A, -1).T
-print(-W)
-soln = threshlin_ode(-W)
-
