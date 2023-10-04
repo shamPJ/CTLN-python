@@ -4,7 +4,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 from threshlin_ode import threshlin_ode
 
-def sA2soln(sA,T=None,X0=None,epsilon=None,delta=None,theta=None):
+def sA2soln(sA, T=None, X0=[], epsilon=None, delta=None, theta=None):
     """
 
     calls: graph2net.m and threshlin_ode.m
@@ -21,8 +21,8 @@ def sA2soln(sA,T=None,X0=None,epsilon=None,delta=None,theta=None):
 
     n = sA.shape[0]    # no. of neurons
 
-    if T == None : T = 100
-    if X0 == None : np.zeros((n,)) + .01*np.random.randn(n);  # break symmetry on init conds
+    if T == None : T = np.array([100]).reshape(1,-1)
+    if len(X0) == 0 : X0 = np.zeros((n,)) + .01*np.random.randn(n);  # break symmetry on init conds
     if epsilon == None : epsilon = .25
     if delta == None :  2*epsilon
     if theta == None : theta = 1
@@ -31,7 +31,7 @@ def sA2soln(sA,T=None,X0=None,epsilon=None,delta=None,theta=None):
     W = graph2net(sA, epsilon, delta)
 
     # create external input vector b from theta
-    if len(theta) == 1:
+    if hasattr(theta, "__len__") == False:
         b = theta*np.ones((n,1))
     else:
         b = theta

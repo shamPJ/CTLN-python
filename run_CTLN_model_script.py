@@ -1,4 +1,6 @@
 import numpy as np
+from sA2soln import sA2soln
+from utils import plot_ratecurves, plot_projection
 
 # STEP 1. Input any n x n adjacency matrix, called sA.
 # Note: if i->j, then sA(j,i) = 1.
@@ -21,36 +23,33 @@ print(sA)
 
 # STEP 2. Simulate dynamics for the corresponding threshlin network model
 
-% simulation parameters
-n = size(sA,1); % number of neurons
-T = 100; % simulation time length, in units of membrane timescale
-e = .25; % epsilson value (default is .25)
-d = 2*e; % delta value (default is 2*e = .5)
-theta = 1; % theta value
+# simulation parameters
+n = sA.shape[0]                      # number of neurons
+T = np.array([100]).reshape(1,-1)    # simulation time length, in units of membrane timescale
+e = .25                              # epsilson value (default is .25)
+d = 2*e                              # delta value (default is 2*e = .5)
+theta = 1                            # theta value
 
-% SET INITIAL CONDITIONS
-X0 = [0 0 0 .2]'; % user-specified initial conditions
-% Make sure that the initial condition has length n and is a column vector by including an apostrophe at the end
+# SET INITIAL CONDITIONS
+X0 = np.array([0, 0, 0, .2]) # user-specified initial conditions
+assert n == X0.shape[0], "X0 has a wrong shape != n"
 
-% X0 = .5*rand(n,1); % random initial condition
+# solve ODEs (solution is returned in "soln" struct)
+soln = sA2soln(sA,T,X0,e,d,theta)
 
-% fp = sA2fixpts(sA,e,d,theta); % the fixed points of the CTLN
-% X0 = fp(1,:)' + 0.1*rand(n,1); % set the initial condition to be a small random perturbation around one of the fixed points
+# OR 
 
-% solve ODEs (solution is returned in "soln" struct)
-soln = sA2soln(sA,T,X0,e,d,theta);
+# % X0 = .5*np.random.randn(n,) # random initial condition
 
+# % fp = sA2fixpts(sA,e,d,theta); % the fixed points of the CTLN
+# % X0 = fp(1,:)' + 0.1*rand(n,1); % set the initial condition to be a small random perturbation around one of the fixed points
 
-% STEP 3. Plot the results!
+# STEP 3. Plot the results!
 
-% pick projection directions (they get normalized later)
-proj = []; % to use defaults
+# plot adjacency matrix and solution!
 
-% plot adjacency matrix and solution!
-if n<=6
-    colors = [0 .5 .7; .15 .6 0; .5 .5 .5;...
-        1 .643 0; .8 0 0; 0 0 0];
-else
-    colors=[];
-end
-plot_soln(soln,proj,colors);
+#plot_soln(soln,proj,colors)
+X = soln['X']
+time = soln['time']
+plot_projection(X, proj=None, interval=None, color='k')
+plot_ratecurves(X, time)

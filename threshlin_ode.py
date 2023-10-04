@@ -15,7 +15,7 @@ def nonlin(x,W,b):
     y = np.maximum(0, x)
     return y.reshape(-1,)
 
-def threshlin_ode(W, b=None, T=None, X0=None):
+def threshlin_ode(W, b=[], T=None, X0=[]):
     """
     The threshlin ode to be solved: x-dot = -x + [Wx + b]_+
 
@@ -31,10 +31,10 @@ def threshlin_ode(W, b=None, T=None, X0=None):
 
     
     n = W.shape[0]  # find n = #neurons
-    if b == None : b = np.ones((n,1)) # default is b = 1, uniform input
+    if len(b) == 0 : b = np.ones((n,1)) # default is b = 1, uniform input
     m = b.shape[1] # number of b-vectors input
     if T == None : T = 10*np.ones((1,m))   # need to specify for each b-vector
-    if X0 == None :X0 = np.zeros((n,))
+    if len(X0) == 0 :X0 = np.zeros((n,))
   
     assert n ==  W.shape[1], "W must be a square matrix"
     assert n == b.shape[0], "b must have same dimension as sides of W"
@@ -51,30 +51,34 @@ def threshlin_ode(W, b=None, T=None, X0=None):
 
     # solve threshlin ode for each b-vector, patch solutions...................
     t0 = 0
+
+    def lotkavolterra(t, z, a, b, c, d):
+        x, y = z
+        return [a*x - b*x*y, -c*y + d*x*y]
+    
     for i in range(m):
-        
-        step = int(T[i][0]/.01)    # use time steps of ".01" in units of timescale
-        t_eval = np.linspace(0,T[i],step).reshape(-1,)
+        step = int(T[:,i][0]/.01)    # use time steps of ".01" in units of timescale
+        t_eval = np.linspace(t0,t0+T[:,i],step).reshape(-1,)
         print("t_eval shape ", t_eval.shape)
 
-        sol = solve_ivp(fun=lambda t, x: (-x + nonlin(x,W,b)), t_span=(0,T[i]), y0=X0, t_eval=t_eval)
-    
+        sol = solve_ivp(fun=lambda t, x: (-x + nonlin(x,W,b)), t_span=(t0,t0+T[:,i]), y0=X0, t_eval=t_eval, dense_output=True)
+        #sol = solve_ivp(lotkavolterra, [0, 15], [10, 5], args=(1.5, 1, 3, 1), dense_output=True)
         time, X = sol.t, sol.y    # time steps and values of the solution at t, shape (n, len(time))
-        Y = W@X + b     # track arguments Wx+b inside []_+, shape (n, len(time))  
-
+        #Y = W@X + b     # track arguments Wx+b inside []_+, shape (n, len(time))  
+        
         print("time shape ", time.shape)
         print("X shape ", X.shape)
-        print("Y shape ", Y.shape)
+        #print("Y shape ", Y.shape)
 
-        soln_X.append(X)
-        soln_Y.append(Y)
+        soln_X.append(X.T)
+        #soln_Y.append(Y.T)
         soln_time.append(time)
 
-        X0 = X[:,-1]    # reset initial condition for next b-vector
+        X0 = X[-1,:]    # reset initial condition for next b-vector
         t0 = time[-1]   # reset initial time for next b-vector
     
     soln['X'] = np.concatenate(soln_X, axis=1)
-    soln['Y'] = np.concatenate(soln_Y, axis=1)
+    #soln['Y'] = np.concatenate(soln_Y, axis=1)
     soln['time'] = np.concatenate(soln_time)
 
     return soln
