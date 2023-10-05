@@ -1,5 +1,40 @@
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
+
+def plot_graph(sA, colors=[]):
+    """
+    This function plots all the nodes of the graph around a circle then puts
+    a directed arrow from node j to node i if sA(i,j)=1
+
+    :param sA     : matrix of shape (n,n), binary adjacency matrix for a directed graph; if i->j, then sA(j,i) = 1.
+    :param colors : list, colors of the graph nodes
+    """
+
+    n = sA.shape[0] # n.o. nodes
+    if len(colors) == 0 : colors = list(mcolors.TABLEAU_COLORS.values())
+
+    # determine positions for nodes
+    r = 1
+    idxs = np.arange(n)
+    x = r*np.cos(-idxs*2*np.pi/n + np.pi/2)
+    y = r*np.sin(-idxs*2*np.pi/n + np.pi/2)
+    pos = {}
+    for i in range(n):
+        pos[i] = (x[i], y[i])
+
+    # create graph
+    G = nx.DiGraph()
+    G.add_nodes_from(range(n))
+
+    # add edges
+    for j in range(n):
+        for i in range(n):
+            if sA[i,j] == 1:
+                G.add_edge(j, i)
+    nx.draw(G, pos, node_size=600, node_color=colors[:n], arrowsize=20, width=2, with_labels=True)
+    plt.show()
 
 def plot_ratecurves(X, time):
     """

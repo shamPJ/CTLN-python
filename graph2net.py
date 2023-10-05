@@ -2,7 +2,7 @@ import numpy as np
 
 def graph2net(sA, e, d):
     """
-    :param sA : matrix of shape (n,n), binary adjacency matrix for a directed graph; if i->j, then sA(j,i) = 1.
+    :param sA : matrix of shape (n,n), binary adjacency matrix for a directed graph; if i->j, then sA(j,i) = 1
     :param e  : float, epsilon value to control synaptic strengths 
     :param d  : float, delta value for inhibitory weights 
 
@@ -18,5 +18,5 @@ def graph2net(sA, e, d):
     # create matrix W from A: W = I - 11^t + A
     n = A.shape[0]
     W = np.eye(n) - np.ones((n,n)) + A
-
+    print("W ", W)
     return W

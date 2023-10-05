@@ -1,6 +1,6 @@
 import numpy as np
 from sA2soln import sA2soln
-from utils import plot_ratecurves, plot_projection
+from utils import plot_graph, plot_ratecurves, plot_projection
 
 # STEP 1. Input any n x n adjacency matrix, called sA.
 # Note: if i->j, then sA(j,i) = 1.
@@ -53,3 +53,4 @@ X = soln['X']
 time = soln['time']
 plot_projection(X, proj=None, interval=None, color='k')
 plot_ratecurves(X, time)
+plot_graph(sA)

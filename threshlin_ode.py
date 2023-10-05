@@ -12,7 +12,7 @@ def nonlin(x,W,b):
     :out y   : numpy array, x after applying ReLU non-linearity
     """
     y = W@x.reshape(-1,1) + b
-    y = np.maximum(0, x)
+    y = np.maximum(0, y)
     return y.reshape(-1,)
 
 def threshlin_ode(W, b=[], T=None, X0=[]):
@@ -51,10 +51,6 @@ def threshlin_ode(W, b=[], T=None, X0=[]):
 
     # solve threshlin ode for each b-vector, patch solutions...................
     t0 = 0
-
-    def lotkavolterra(t, z, a, b, c, d):
-        x, y = z
-        return [a*x - b*x*y, -c*y + d*x*y]
     
     for i in range(m):
         step = int(T[:,i][0]/.01)    # use time steps of ".01" in units of timescale
@@ -62,7 +58,6 @@ def threshlin_ode(W, b=[], T=None, X0=[]):
         print("t_eval shape ", t_eval.shape)
 
         sol = solve_ivp(fun=lambda t, x: (-x + nonlin(x,W,b)), t_span=(t0,t0+T[:,i]), y0=X0, t_eval=t_eval, dense_output=True)
-        #sol = solve_ivp(lotkavolterra, [0, 15], [10, 5], args=(1.5, 1, 3, 1), dense_output=True)
         time, X = sol.t, sol.y    # time steps and values of the solution at t, shape (n, len(time))
         #Y = W@X + b     # track arguments Wx+b inside []_+, shape (n, len(time))  
         
